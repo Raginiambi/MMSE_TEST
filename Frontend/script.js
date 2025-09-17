@@ -154,9 +154,7 @@ function renderQuestion(question) {
 
   // Handle types
   switch (question.answer_type) {
-    case 'calendar':
-      inputHTML = `<input type="date" id="answerInput" class="answer-box" >`;
-      break;
+
 
     case 'image_choice':
       inputHTML = `<div id="image-options">`;
@@ -183,16 +181,54 @@ function renderQuestion(question) {
                placeholder="Type in order">
       `;
       break;
-    case 'img_show':
-      inputHTML =  `
-        <div class="image-row">
-          <img src="images/pencil.avif" class="sequence_img" alt="Pencil">
-        </div>
-        <input type="text" id="answerInput" 
-               class="answer-box" 
-               placeholder="Write the object shown in image">
-      `;
-      break;
+ case 'img_show':
+  if (question.image) {
+    // Case A: Single image with options
+    inputHTML = `
+      <div class="image-row">
+        <img src="images/${question.image}" class="question-img" alt="Question Image">
+      </div>
+    `;
+
+    inputHTML += `<div id="mcq-options" class="mcq-container">`;
+    question.options.forEach(opt => {
+      inputHTML += `
+        <div class="mcq-option" onclick="selectMCQOption(this, '${opt}')">
+          ${opt}
+        </div>`;
+    });
+    inputHTML += `</div><input type="hidden" id="answerInput">`;
+
+  } else {
+    // Case B: Sequence recall (your old logic)
+    inputHTML = `<div class="image-row">`;
+    question.options.forEach(imgSrc => {
+      inputHTML += `<img src="images/${imgSrc}" class="sequence_img" alt="Sequence Object">`;
+    });
+    inputHTML += `</div>`;
+
+    // Generate random sequences
+    let sequences = [
+      question.options,
+      [question.options[1], question.options[2], question.options[0]],
+      [question.options[2], question.options[0], question.options[1]],
+      [question.options[2], question.options[1], question.options[0]]
+    ].sort(() => Math.random() - 0.5);
+
+    inputHTML += `<div id="mcq-options" class="mcq-container">`;
+    sequences.forEach(seq => {
+      let displayName = seq.map(s => s.split('.')[0]).join(", ");
+      let value = seq.join(",");
+      inputHTML += `
+        <div class="mcq-option" onclick="selectMCQOption(this, '${value}')">
+          ${displayName}
+        </div>`;
+    });
+    inputHTML += `</div><input type="hidden" id="answerInput">`;
+  }
+  break;
+
+
     case 'multiple_choice':
       inputHTML = `<div id="mcq-options" class="mcq-container">`;
       question.options.forEach((opt, idx) => {
@@ -203,6 +239,24 @@ function renderQuestion(question) {
   });
   inputHTML += `</div>`;
   inputHTML += `<input type="hidden" id="answerInput">`; 
+  break;
+
+    case 'img_with_mcq':
+  // Hardcode or fetch the image for this question
+  inputHTML = `
+    <div class="image-row">
+      <img src="images/pencil.avif" class="question-img" alt="Pencil">
+    </div>
+  `;
+
+  inputHTML += `<div id="mcq-options" class="mcq-container">`;
+  question.options.forEach(opt => {
+    inputHTML += `
+      <div class="mcq-option" onclick="selectMCQOption(this, '${opt}')">
+        ${opt}
+      </div>`;
+  });
+  inputHTML += `</div><input type="hidden" id="answerInput">`;
   break;
 
 

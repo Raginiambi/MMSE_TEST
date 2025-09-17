@@ -155,6 +155,7 @@ def get_question(question_id):
                     ]
                     question['options'] = [d.strftime("%d %B %Y") for d in date_options]
                     random.shuffle(question['options'])
+            
 
            
         else:
@@ -208,9 +209,11 @@ def submit_answer():
              if correct_day == user_day:
                 score = max_score
         elif "date today" in qtext:
-            if user_answer in now.strftime("%d %B %Y").lower() or \
-               user_answer in now.strftime("%Y-%m-%d").lower():
+            correct_date = now.date().strftime("%d %B %Y").lower().strip()
+            if user_answer == correct_date:
                 score = max_score
+            else:
+                score = 0
 
         # ✅ Location-related
         elif "place" in qtext or "city" in qtext in qtext:
@@ -229,14 +232,25 @@ def submit_answer():
                 score = max_score
             else:   
                 score = 0
+        elif "from the given pictures choose the option" in qtext:
+            correct_ans = "apple,chair,pencil"
+            user_ans = user_answer.lower().replace(".avif","").replace(".jpeg","").replace(".jpg","")
+            user_ans = " ".join(user_ans.replace(",", " ").split())
+            correct_ans_norm = " ".join(correct_ans.replace(",", " ").split())
+    
+            if user_ans == correct_ans_norm:
+                score = max_score
+           
+
 
         # ✅ 3-object registration / recall
         elif "3 objects" in qtext and "recall" in qtext:
-            if all(x in user_answer for x in ["pencil", "apple", "chair"]):
+            correct_Ans = "apple,chair,pencil"
+            if user_answer.lower().strip() == correct_Ans:
                 score = max_score
-        elif "3 objects" in qtext and "repeat" in qtext:
-            if all(x in user_answer for x in ["pencil", "apple", "chair"]):
-                score = max_score
+            else:
+                score = 0
+        
 
         # ✅ Phrase repeat
         elif "no ifs, ands" in qtext:
@@ -248,7 +262,7 @@ def submit_answer():
                 score = max_score
         # ✅ Name the object (image click like "pencil.png")
         elif "name the object" in qtext:
-            if any(x in user_answer for x in ["pencil", "apple", "chair"]):
+            if any(x in user_answer for x in ["pencil"]):
                 score = max_score
         elif "sentence of your choosing" in qtext:
             if user_answer.strip():

@@ -118,3 +118,16 @@ header{
   border: 1.2cap solid transparent;
   border-radius: 2vh;
 }
+
+.question-img{
+  height:19vh;
+  width:19vh;
+  border-radius: 2vh;
+}
+
+.image-row{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:2vh;
+}
