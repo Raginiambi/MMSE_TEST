@@ -43,3 +43,103 @@
   </script>
 </body>
 </html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - MMSE Test Sessions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #004080;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    th {
+      background-color: #004080;
+      color: white;
+    }
+    tr:hover {
+      background-color: #eef;
+    }
+    video {
+      width: 220px;
+      height: 140px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .no-video {
+      color: gray;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Dashboard — All Users and Test Sessions</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>User Name</th>
+        <th>Session ID</th>
+        <th>Started At</th>
+        <th>Ended At</th>
+        <th>Consent</th>
+        <th>Recording</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td>{{ s.user_id }}</td>
+        <td>{{ s.user_name }}</td>
+        <td>{{ s.session_id }}</td>
+        <td>{{ s.started_at.strftime("%Y-%m-%d %H:%M:%S") if s.started_at else '-' }}</td>
+        <td>{{ s.ended_at.strftime("%Y-%m-%d %H:%M:%S") if s.ended_at else 'Ongoing' }}</td>
+        <td>{{ 'Yes' if s.consent else 'No' }}</td>
+        <td>
+          {% if s.video_path %}
+            {% set path = s.video_path.replace('\\', '/') %}
+            {% if path.startswith('uploads/') %}
+              <video controls>
+                <source src="{{ url_for('serve_uploaded_video', filename=path.split('/')[-1]) }}" type="video/mp4">
+
+                Your browser does not support the video tag.
+              </video>
+            {% elif path.startswith('/static/') %}
+              <video controls>
+                <source src="{{ path }}" type="video/mp4">
+              </video>
+            {% else %}
+              <video controls>
+                <source src="{{ path }}" type="video/mp4">
+              </video>
+            {% endif %}
+          {% else %}
+            <span class="no-video">No Recording</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html> -->
