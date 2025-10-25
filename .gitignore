@@ -1,0 +1,6 @@
+# Ignore virtual environments
+mmse_env/
+venv/
+env/
+__pycache__/
+*.pyc
