@@ -19,7 +19,11 @@ Built with a clean UI, automated scoring, and secure data handling for research 
 🛠️ **Tech Stack**
 
 **Frontend**: HTML, CSS, JavaScript
+
 **Backend**: Flask (Python)
+
 **Database**: MySQL 
+
 **Version Control**: Git & GitHub
+
 **Environment**: Python Virtual Environment (mmse_env)
