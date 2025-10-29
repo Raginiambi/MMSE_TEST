@@ -29,8 +29,6 @@ from auth import hash_password, check_password
 from flask_cors import CORS
 import cv2, base64, numpy as np
 
-# IMPORTANT: DO NOT import DeepFace here at module level.
-# from deepface import DeepFace   <-- REMOVE this top-level import
 
 import json, random
 from datetime import datetime, timedelta
@@ -628,22 +626,89 @@ from deepface import DeepFace
 import json
 from db import get_connection
 
+# @app.route('/upload_session_video', methods=['POST'])
+# def upload_session_video():
+#     if 'video' not in request.files:
+#         return jsonify({"error": "No video file sent"}), 400
+
+#     video_file = request.files['video']
+#     test_session_id = request.form.get('test_session_id') or request.form.get('testSessionId')
+#     if not test_session_id:
+#         return jsonify({"error": "Missing test_session_id"}), 400
+
+#     filename = secure_filename(video_file.filename or f"session_{test_session_id}.webm")
+#     save_name = f"session_{test_session_id}_{filename}"
+#     save_path = os.path.join(UPLOAD_DIR, save_name)
+#     video_file.save(save_path)
+
+#     # Save to DB
+#     conn = get_connection()
+#     cursor = conn.cursor()
+#     cursor.execute("""
+#         INSERT INTO mmse_session_videos (test_session_id, file_path)
+#         VALUES (%s, %s)
+#     """, (test_session_id, save_path))
+#     video_id = cursor.lastrowid
+#     conn.commit()
+
+#     # --- AUTOMATED DEEPFACE ANALYSIS ---
+#     cap = cv2.VideoCapture(save_path)
+#     frame_rate = cap.get(cv2.CAP_PROP_FPS) or 25
+#     frame_idx = 0
+#     metrics_cursor = conn.cursor()
+
+#     while True:
+#         ret, frame = cap.read()
+#         if not ret:
+#             break
+
+#         # Analyze every 10th frame to reduce load
+#         if frame_idx % 10 == 0:
+#             try:
+#                 result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
+#                 dominant_emotion = result[0]['dominant_emotion']
+#                 timestamp_ms = int((frame_idx / frame_rate) * 1000)
+#                 metrics_cursor.execute("""
+#                     INSERT INTO mmse_facial_metrics (session_video_id, timestamp_ms, emotion_json)
+#                     VALUES (%s, %s, %s)
+#                 """, (video_id, timestamp_ms, json.dumps({"dominant_emotion": dominant_emotion})))
+#             except Exception as e:
+#                 print(f"⚠️ Error analyzing frame {frame_idx}: {e}")
+
+#         frame_idx += 1
+
+#     conn.commit()
+#     metrics_cursor.close()
+#     cursor.close()
+#     conn.close()
+#     cap.release()
+
+#     return jsonify({"message": "video saved and analyzed", "video_id": video_id})
+
 @app.route('/upload_session_video', methods=['POST'])
 def upload_session_video():
+    print("📩 Received upload_session_video request")
+    print("Files:", request.files)
+    print("Form:", request.form)
+
     if 'video' not in request.files:
+        print("❌ No video file sent")
         return jsonify({"error": "No video file sent"}), 400
 
     video_file = request.files['video']
     test_session_id = request.form.get('test_session_id') or request.form.get('testSessionId')
     if not test_session_id:
+        print("❌ Missing test_session_id")
         return jsonify({"error": "Missing test_session_id"}), 400
 
     filename = secure_filename(video_file.filename or f"session_{test_session_id}.webm")
     save_name = f"session_{test_session_id}_{filename}"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     save_path = os.path.join(UPLOAD_DIR, save_name)
     video_file.save(save_path)
+    print(f"✅ Video saved to: {save_path}")
 
-    # Save to DB
+    # Save metadata to DB
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
@@ -653,7 +718,7 @@ def upload_session_video():
     video_id = cursor.lastrowid
     conn.commit()
 
-    # --- AUTOMATED DEEPFACE ANALYSIS ---
+    # Optional: Analyze facial emotions
     cap = cv2.VideoCapture(save_path)
     frame_rate = cap.get(cv2.CAP_PROP_FPS) or 25
     frame_idx = 0
@@ -664,7 +729,6 @@ def upload_session_video():
         if not ret:
             break
 
-        # Analyze every 10th frame to reduce load
         if frame_idx % 10 == 0:
             try:
                 result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
@@ -685,7 +749,9 @@ def upload_session_video():
     conn.close()
     cap.release()
 
+    print(f"✅ Video analysis complete for session {test_session_id}")
     return jsonify({"message": "video saved and analyzed", "video_id": video_id})
+
 
 
 

@@ -7,5 +7,5 @@ def get_connection():
         user="root",
         password="R@g!n!22",
         database="mmse_db",
-        cursorclass=DictCursor   # ← important
+        cursorclass=pymysql.cursors.DictCursor
     )

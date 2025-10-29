@@ -71,7 +71,8 @@ function register() {
   const password = document.getElementById("password").value;
   const age = document.getElementById("age").value;
   const gender = document.getElementById("gender").value;
-  const location = document.getElementById("location").value;
+  const Location = document.getElementById("location").value;
+  
 
   fetch(`${BASE_URL}/register`, {
     method: "POST",
@@ -98,6 +99,7 @@ function loadProfile() {
     <p><strong>Email:</strong> ${user.email}</p>
     <p><strong>Age:</strong> ${user.age}</p>
     <p><strong>Gender:</strong> ${user.gender}</p>
+    
   `;
 }
 
@@ -178,7 +180,7 @@ async function showQuestion() {
   //   return;
   // }
   if (currentIndex >= mmseQuestions.length) {
-  if (testCompleted) return; // ✅ prevent multiple executions
+  if (testCompleted) stopCameraRecordingAndUpload(); // ✅ prevent multiple executions
   testCompleted = true;
 
   console.log("✅ All questions completed");
@@ -216,36 +218,87 @@ async function showQuestion() {
   renderQuestion(question);
 }
 
+// async function submitAnswer() {
+//   const answer = document.getElementById("answerInput").value;
+//   const user = JSON.parse(localStorage.getItem("user"));
+//   const questionId = mmseQuestions[currentIndex].id;
+//   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
+
+  
+
+//   const testSessionId = currentTestSessionId || localStorage.getItem("testSessionId");
+//    if (!user || !testSessionId) {
+//     alert("No active test session. Please restart the test.");
+//     return;
+//   }
+
+
+//   const response = await fetch(`${BASE_URL}/submit_answer`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({
+//       user_id: user.id,
+//       question_id: questionId,
+//       answer: answer,
+//       time_taken: timeTaken,
+//      test_session_id: testSessionId
+//     })
+//   }).then(res => res.json())
+//     .then(() => {
+//       currentIndex++;
+//        if (currentIndex >= mmseQuestions.length) {
+//          stopCameraRecordingAndUpload();
+//     console.log("✅ Test completed! Preparing summary...");
+//   console.log("Summary saved:", localStorage.getItem("summary"));
+//   window.location.href = "summary.html";
+  
+//   } else {
+//     showQuestion();
+//   }
+//     });
+// }
+
 async function submitAnswer() {
   const answer = document.getElementById("answerInput").value;
   const user = JSON.parse(localStorage.getItem("user"));
   const questionId = mmseQuestions[currentIndex].id;
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
 
-  
-
   const testSessionId = currentTestSessionId || localStorage.getItem("testSessionId");
-   if (!user || !testSessionId) {
+  if (!user || !testSessionId) {
     alert("No active test session. Please restart the test.");
     return;
   }
 
-
-  const response = await fetch(`${BASE_URL}/submit_answer`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: user.id,
-      question_id: questionId,
-      answer: answer,
-      time_taken: timeTaken,
-     test_session_id: testSessionId
-    })
-  }).then(res => res.json())
-    .then(() => {
-      currentIndex++;
-      showQuestion();
+  try {
+    await fetch(`${BASE_URL}/submit_answer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        question_id: questionId,
+        answer: answer,
+        time_taken: timeTaken,
+        test_session_id: testSessionId,
+      }),
     });
+
+    currentIndex++;
+
+    if (currentIndex >= mmseQuestions.length) {
+      console.log("✅ Test completed! Stopping camera and uploading...");
+      // ✅ Await ensures upload completes before redirect
+      await stopCameraRecordingAndUpload();
+
+      console.log("✅ Upload finished, now redirecting...");
+      window.location.href = "summary.html";
+    } else {
+      showQuestion();
+    }
+  } catch (err) {
+    console.error("❌ Error submitting answer:", err);
+    alert("Something went wrong while submitting your answer. Please try again.");
+  }
 }
 
 
@@ -455,7 +508,6 @@ async function beginMMSETest() {
   }
 }
 
-
 async function startCameraRecording() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -480,47 +532,51 @@ async function startCameraRecording() {
     if (e.data.size > 0) recordedChunks.push(e.data);
   };
 
-  mediaRecorder.onstop = async () => {
-    const blob = new Blob(recordedChunks, { type: "video/webm" });
-    console.log("🎬 Recording complete, uploading...");
-    await uploadSessionVideo(blob);
-  };
-
-  mediaRecorder.start(1000); // keep it alive and record continuously
-  console.log("✅ Recording started and running in background");
+  mediaRecorder.start();
+  console.log("🎥 Recording started...");
 }
 
 
-// Stop recording and upload (called when test ends)
 async function stopCameraRecordingAndUpload() {
   return new Promise((resolve) => {
     if (!mediaRecorder || mediaRecorder.state === "inactive") {
       console.warn("No active recording to stop");
-      return resolve();
+      return resolve(); // Resolve immediately if nothing to stop
     }
 
     mediaRecorder.onstop = async () => {
-      console.log("🎞️ Recording stopped. Uploading...");
+      console.log("🎞️ Recording stopped. Preparing upload...");
       const blob = new Blob(recordedChunks, { type: "video/webm" });
 
       try {
         await uploadSessionVideo(blob);
-        console.log("✅ Video upload finished");
+        console.log("✅ Video uploaded successfully!");
       } catch (err) {
         console.error("❌ Upload failed:", err);
       }
 
+      // stop camera
       if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+        localStream.getTracks().forEach((track) => track.stop());
         localStream = null;
       }
 
-      resolve(); // ✅ only after upload is done
+      resolve(); // ✅ Make sure promise resolves no matter what
     };
 
-    mediaRecorder.stop(); // triggers onstop
+    // In case the recorder never fires 'onstop', set a fallback timer
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        console.warn("⏱️ Forcing stopCameraRecordingAndUpload() resolve (timeout)");
+        mediaRecorder.stop();
+      }
+    }, 5000); // fallback after 5s
+
+    console.log("🛑 Stopping recording...");
+    mediaRecorder.stop();
   });
 }
+
 
 // Upload the video blob to Flask endpoint
 async function uploadSessionVideo(blob) {
