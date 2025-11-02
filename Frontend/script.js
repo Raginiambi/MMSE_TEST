@@ -218,45 +218,6 @@ async function showQuestion() {
   renderQuestion(question);
 }
 
-// async function submitAnswer() {
-//   const answer = document.getElementById("answerInput").value;
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   const questionId = mmseQuestions[currentIndex].id;
-//   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-
-  
-
-//   const testSessionId = currentTestSessionId || localStorage.getItem("testSessionId");
-//    if (!user || !testSessionId) {
-//     alert("No active test session. Please restart the test.");
-//     return;
-//   }
-
-
-//   const response = await fetch(`${BASE_URL}/submit_answer`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       user_id: user.id,
-//       question_id: questionId,
-//       answer: answer,
-//       time_taken: timeTaken,
-//      test_session_id: testSessionId
-//     })
-//   }).then(res => res.json())
-//     .then(() => {
-//       currentIndex++;
-//        if (currentIndex >= mmseQuestions.length) {
-//          stopCameraRecordingAndUpload();
-//     console.log("✅ Test completed! Preparing summary...");
-//   console.log("Summary saved:", localStorage.getItem("summary"));
-//   window.location.href = "summary.html";
-  
-//   } else {
-//     showQuestion();
-//   }
-//     });
-// }
 
 async function submitAnswer() {
   let answer = document.getElementById("answerInput").value;
