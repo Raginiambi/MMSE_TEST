@@ -514,45 +514,6 @@ def get_user_tests(user_id):
     conn.close()
     return jsonify(sessions)
 
-# @app.route('/admin/test_details/<int:session_id>', methods=['GET'])
-# def get_test_details(session_id):
-#     conn = get_connection()
-#     cursor = conn.cursor(dictionary=True)
-    
-#     # Fetch test responses
-#     cursor.execute("""
-#         SELECT
-#             q.question_text,
-#             r.answer,
-#             r.time_taken_seconds,
-#             r.score_awarded,
-#             r.submitted_at
-#         FROM mmse_responses r
-#         JOIN mmse_questions q ON r.question_id = q.id
-#         WHERE r.test_session_id = %s
-#         ORDER BY r.submitted_at ASC
-#     """, (session_id,))
-    
-#     responses = cursor.fetchall()
-
-#     # Fetch video filename if exists
-#     video_path = f"uploads/recordings/session_{session_id}.webm"
-    
-#     if not os.path.exists(video_path):
-#         video_url = None
-#     else:
-#         # Flask static URL for frontend
-#         video_url = f"http://127.0.0.1:5000/{video_path}"
-
-#     cursor.close()
-#     conn.close()
-    
-#     return jsonify({
-#         "responses": responses,
-#         "video_url": video_url
-#     })
-
-
 
 @app.route('/admin/test_details/<int:session_id>', methods=['GET'])
 def get_test_details(session_id):
@@ -575,115 +536,50 @@ def get_test_details(session_id):
     conn.close()
     return jsonify(details)
 
-# Upload recorded video for a session
-# @app.route('/upload_session_video', methods=['POST'])
-# def upload_session_video():
-#     # multipart/form-data expected: 'video' file and 'test_session_id'
-#     if 'video' not in request.files:
-#         return jsonify({"error": "No video file sent"}), 400
+@app.route("/admin/emotions/<int:session_id>", methods=["GET"])
+def get_session_emotions(session_id):
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Fetch emotion counts (query remains the same)
+        cur.execute("""
+            SELECT emotion, COUNT(*) AS count
+            FROM emotions
+            WHERE session_id = %s
+            GROUP BY emotion
+        """, (session_id,))
+        rows = cur.fetchall()
 
-#     video_file = request.files['video']
-#     test_session_id = request.form.get('test_session_id') or request.form.get('testSessionId')
-#     if not test_session_id:
-#         return jsonify({"error": "Missing test_session_id"}), 400
+        if not rows:
+            return jsonify({"message": "No emotion data found for this session"}), 404
 
-#     filename = secure_filename(video_file.filename or f"session_{test_session_id}.webm")
-#     save_name = f"session_{test_session_id}_{filename}"
-#     save_path = os.path.join(UPLOAD_DIR, save_name)
+        # Convert to {emotion: percentage}
+        total = sum(r['count'] for r in rows)
 
-#     # Save file
-#     video_file.save(save_path)  
+        # 🛑 FIX: Explicitly check for zero total before division
+        if total == 0:
+            # This should have been caught by 'if not rows:', but is a safe guard.
+            print(f"⚠️ Warning: Session {session_id} returned rows, but total count is zero.")
+            return jsonify({"message": "Emotion data retrieved but total count is zero"}), 404
 
-#     # Validate mime (optional)
-#     mime = video_file.mimetype or "application/octet-stream"
-#     size = os.path.getsize(save_path)
+        emotion_summary = {
+            r['emotion']: round((r['count'] / total) * 100, 2)
+            for r in rows
+        }
 
-#     # Insert record into mmse_session_videos and update mmse_test_sessions.video_path
-#     conn = get_connection()
-#     cursor = conn.cursor()
-#     cursor.execute("""
-#         INSERT INTO mmse_session_videos (test_session_id, file_path, mime_type, size_bytes)
-#         VALUES (%s, %s, %s, %s)
-#     """, (test_session_id, save_path, mime, size))
-#     video_id = cursor.lastrowid
+        return jsonify(emotion_summary)
+    except Exception as e:
+        # NOTE: Your print statement here will show the exact error in the server console!
+        print("❌ Error fetching emotions:", e)
+        return jsonify({"error": str(e)}), 500
 
-#     # Also update test session's video_path and ended_at (mark end of test)
-#     try:
-#         cursor.execute("UPDATE mmse_test_sessions SET video_path = %s, ended_at = NOW() WHERE id = %s",
-#                        (save_path, test_session_id))
-#     except Exception:
-#         # If underlying schema lacks columns, ignore gracefully
-#         pass
-
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
-
-#     return jsonify({"message": "video saved", "video_id": video_id, "path": save_path})
 
 import cv2
 from deepface import DeepFace
 import json
 from db import get_connection
 
-# @app.route('/upload_session_video', methods=['POST'])
-# def upload_session_video():
-#     if 'video' not in request.files:
-#         return jsonify({"error": "No video file sent"}), 400
-
-#     video_file = request.files['video']
-#     test_session_id = request.form.get('test_session_id') or request.form.get('testSessionId')
-#     if not test_session_id:
-#         return jsonify({"error": "Missing test_session_id"}), 400
-
-#     filename = secure_filename(video_file.filename or f"session_{test_session_id}.webm")
-#     save_name = f"session_{test_session_id}_{filename}"
-#     save_path = os.path.join(UPLOAD_DIR, save_name)
-#     video_file.save(save_path)
-
-#     # Save to DB
-#     conn = get_connection()
-#     cursor = conn.cursor()
-#     cursor.execute("""
-#         INSERT INTO mmse_session_videos (test_session_id, file_path)
-#         VALUES (%s, %s)
-#     """, (test_session_id, save_path))
-#     video_id = cursor.lastrowid
-#     conn.commit()
-
-#     # --- AUTOMATED DEEPFACE ANALYSIS ---
-#     cap = cv2.VideoCapture(save_path)
-#     frame_rate = cap.get(cv2.CAP_PROP_FPS) or 25
-#     frame_idx = 0
-#     metrics_cursor = conn.cursor()
-
-#     while True:
-#         ret, frame = cap.read()
-#         if not ret:
-#             break
-
-#         # Analyze every 10th frame to reduce load
-#         if frame_idx % 10 == 0:
-#             try:
-#                 result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-#                 dominant_emotion = result[0]['dominant_emotion']
-#                 timestamp_ms = int((frame_idx / frame_rate) * 1000)
-#                 metrics_cursor.execute("""
-#                     INSERT INTO mmse_facial_metrics (session_video_id, timestamp_ms, emotion_json)
-#                     VALUES (%s, %s, %s)
-#                 """, (video_id, timestamp_ms, json.dumps({"dominant_emotion": dominant_emotion})))
-#             except Exception as e:
-#                 print(f"⚠️ Error analyzing frame {frame_idx}: {e}")
-
-#         frame_idx += 1
-
-#     conn.commit()
-#     metrics_cursor.close()
-#     cursor.close()
-#     conn.close()
-#     cap.release()
-
-#     return jsonify({"message": "video saved and analyzed", "video_id": video_id})
 
 @app.route('/upload_session_video', methods=['POST'])
 def upload_session_video():
@@ -717,6 +613,17 @@ def upload_session_video():
     """, (test_session_id, save_path))
     video_id = cursor.lastrowid
     conn.commit()
+    cursor.execute(
+        "SELECT user_id FROM mmse_test_sessions WHERE id = %s",
+        (test_session_id,)
+    )
+    session_row = cursor.fetchone()
+    if session_row:
+        user_id = session_row['user_id']
+    else:
+        # Handle error case: session ID is invalid/deleted
+        print(f"❌ Error: Test Session ID {test_session_id} not found.")
+        return jsonify({"error": "Invalid test session ID"}), 400
 
     # Optional: Analyze facial emotions
     cap = cv2.VideoCapture(save_path)
@@ -734,6 +641,10 @@ def upload_session_video():
                 result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
                 dominant_emotion = result[0]['dominant_emotion']
                 timestamp_ms = int((frame_idx / frame_rate) * 1000)
+                metrics_cursor.execute("""
+                    INSERT INTO emotions (session_id, user_id, emotion, confidence)
+                    VALUES (%s, %s, %s, %s)
+                """, (test_session_id, user_id, dominant_emotion, 1.0))
                 metrics_cursor.execute("""
                     INSERT INTO mmse_facial_metrics (session_video_id, timestamp_ms, emotion_json)
                     VALUES (%s, %s, %s)
@@ -927,6 +838,7 @@ def get_alzheimer_risk(user_id, session_id):
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 
 

@@ -14,7 +14,7 @@
   <h2>User Test Sessions</h2>
   <table id="sessionsTable">
     <thead>
-      <tr><th>Session ID</th><th>Date</th><th>Score</th><th>Total Time (sec)</th><th>Action</th></tr>
+      <tr><th>Session ID</th><th>Date</th><th>Score</th><th>Total Time (sec)</th><th>Action</th><th>Emotion</th></tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -35,6 +35,7 @@
             <td>${session.total_score ?? 0}</td>
             <td>${Math.round(session.total_time ?? 0)}</td>
             <td><button onclick="viewSession(${session.session_id})">View Details</button></td>
+            <td><button onclick="viewEmotion(${session.session_id})">View Emotions </button></td>
           `;
           tbody.appendChild(row);
         });
@@ -42,6 +43,9 @@
 
     function viewSession(sessionId) {
       window.location.href = `test_details.html?session_id=${sessionId}`;
+    }
+    function viewEmotion(sessionId){
+      window.location.href = `emotions.html?session_id=${sessionId}`;
     }
   </script>
 </body>

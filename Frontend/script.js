@@ -259,7 +259,7 @@ async function showQuestion() {
 // }
 
 async function submitAnswer() {
-  const answer = document.getElementById("answerInput").value;
+  let answer = document.getElementById("answerInput").value;
   const user = JSON.parse(localStorage.getItem("user"));
   const questionId = mmseQuestions[currentIndex].id;
   const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -267,6 +267,27 @@ async function submitAnswer() {
   const testSessionId = currentTestSessionId || localStorage.getItem("testSessionId");
   if (!user || !testSessionId) {
     alert("No active test session. Please restart the test.");
+    return;
+  }
+
+  
+  const textInput = document.getElementById("answerInput");
+  const selectedOption = document.querySelector('input[name="options"]:checked');
+
+    if (textInput) {
+    answer = textInput.value.trim();
+    if (answer === "") {
+      textInput.style.border = "2px solid red";
+      alert("⚠️ Please enter your answer before continuing.");
+      return;
+    }
+  } 
+  // If question is MCQ-based
+  else if (selectedOption) {
+    answer = selectedOption.value;
+  } 
+  else {
+    alert("⚠️ Please select an option before continuing.");
     return;
   }
 
