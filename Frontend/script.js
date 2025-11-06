@@ -388,7 +388,10 @@ async function renderQuestion(question) {
 
     inputHTML += `<div id="mcq-options" class="mcq-container">`;
     sequences.forEach(seq => {
-      let displayName = seq.map(s => s.split('.')[0]).join(", ");
+      let displayName = seq
+  .filter(s => typeof s === "string")  // ignore undefined
+  .map(s => s.split('.')[0])
+  .join(", ");
       let value = seq.join(",");
       inputHTML += `
         <div class="mcq-option" onclick="selectMCQOption(this, '${value}')">

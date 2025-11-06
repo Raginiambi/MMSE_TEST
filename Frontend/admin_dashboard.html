@@ -3,22 +3,137 @@
 <head>
   <title>Admin Dashboard - All Users</title>
   <style>
-    body { font-family: Arial; padding: 20px; background-color: #f5f5f5; }
-    h2 { color: #004080; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; }
-    tr:hover { background-color: #eef; }
-    button { padding: 6px 12px; background-color: #007BFF; color: white; border: none; border-radius: 4px; }
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #e9ffee, #00be95);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Card Wrapper */
+    .auth-card {
+      background: #fffefa;
+      padding: 45px;
+      border-radius: 28px;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+      width: 100%;
+      max-width: 1300px;
+      overflow-x: auto; /* allow horizontal scroll on mobile */
+    }
+
+    /* Title */
+    .title {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #212121;
+      text-align: center;
+    }
+    .title span {
+      color: #04bd9e;
+      font-weight: 700;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f7f9ea;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      min-width: 600px; /* ensures scroll on small screens */
+    }
+
+    th, td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #9ce6cf;
+      text-align: left;
+      color: #212121;
+    }
+
+    th {
+      background: #21c4a1;
+      color: white;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    tr:hover {
+      background: #f1ffe6;
+    }
+
+    /* Button */
+    .primary-btn {
+      padding: 8px 12px;
+      background: #21c4a1;
+      border: none;
+      color: white;
+      font-weight: 500;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .primary-btn:hover {
+      background: #1fb08e;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .auth-card {
+        padding: 32px;
+      }
+      .title {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 20px;
+      }
+      .title {
+        font-size: 20px;
+      }
+      th, td {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+      .primary-btn {
+        padding: 10px 14px;
+        font-size: 16px;
+      }
+      table {
+        min-width: 400px; /* allow horizontal scroll for small screens */
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>All Registered Users</h2>
-  <table id="usersTable">
-    <thead>
-      <tr><th>Name</th><th>Email</th><th>Registered On</th><th>Action</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="auth-card">
+    <h2 class="title">All <span>Registered Users</span></h2>
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Registered On</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     fetch('http://127.0.0.1:5000/admin/users')
@@ -31,7 +146,7 @@
             <td>${user.name}</td>
             <td>${user.email}</td>
             <td>${new Date(user.created_at).toLocaleString()}</td>
-            <td><button onclick="viewUser(${user.id})">View Tests</button></td>
+            <td><button class="primary-btn" onclick="viewUser(${user.id})">View Tests</button></td>
           `;
           tbody.appendChild(row);
         });
@@ -43,103 +158,3 @@
   </script>
 </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard - MMSE Test Sessions</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    h2 {
-      color: #004080;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 12px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    th {
-      background-color: #004080;
-      color: white;
-    }
-    tr:hover {
-      background-color: #eef;
-    }
-    video {
-      width: 220px;
-      height: 140px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    .no-video {
-      color: gray;
-      font-style: italic;
-    }
-  </style>
-</head>
-<body>
-  <h2>Admin Dashboard — All Users and Test Sessions</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>User ID</th>
-        <th>User Name</th>
-        <th>Session ID</th>
-        <th>Started At</th>
-        <th>Ended At</th>
-        <th>Consent</th>
-        <th>Recording</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in sessions %}
-      <tr>
-        <td>{{ s.user_id }}</td>
-        <td>{{ s.user_name }}</td>
-        <td>{{ s.session_id }}</td>
-        <td>{{ s.started_at.strftime("%Y-%m-%d %H:%M:%S") if s.started_at else '-' }}</td>
-        <td>{{ s.ended_at.strftime("%Y-%m-%d %H:%M:%S") if s.ended_at else 'Ongoing' }}</td>
-        <td>{{ 'Yes' if s.consent else 'No' }}</td>
-        <td>
-          {% if s.video_path %}
-            {% set path = s.video_path.replace('\\', '/') %}
-            {% if path.startswith('uploads/') %}
-              <video controls>
-                <source src="{{ url_for('serve_uploaded_video', filename=path.split('/')[-1]) }}" type="video/mp4">
-
-                Your browser does not support the video tag.
-              </video>
-            {% elif path.startswith('/static/') %}
-              <video controls>
-                <source src="{{ path }}" type="video/mp4">
-              </video>
-            {% else %}
-              <video controls>
-                <source src="{{ path }}" type="video/mp4">
-              </video>
-            {% endif %}
-          {% else %}
-            <span class="no-video">No Recording</span>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</body>
-</html> -->

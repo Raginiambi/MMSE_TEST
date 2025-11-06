@@ -3,21 +3,166 @@
 <head>
   <title>User Test History</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #fff8f0; }
-    h2 { color: #333366; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-    button { padding: 6px 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; }
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #e9ffee, #00be95);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Card Wrapper */
+    .auth-card {
+      background: #fffef8;
+      padding: 40px;
+      border-radius: 28px;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* Title */
+    .title {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #212121;
+      text-align: center;
+    }
+    .title span {
+      color: #04bd9e;
+      font-weight: 700;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f7f9ea;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #9ce6cf;
+      text-align: center;
+      color: #212121;
+    }
+
+    th {
+      background: #21c4a1;
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) {
+      background: #f1ffe6;
+    }
+
+    tr:hover {
+      background: #f1ffe6;
+    }
+
+    /* Buttons */
+    .primary-btn {
+      padding: 8px 12px;
+      background: #21c4a1;
+      border: none;
+      color: white;
+      font-weight: 500;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .primary-btn:hover {
+      background: #1fb08e;
+    }
+
+    /* Mobile Responsive: Card-style rows */
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+      thead tr {
+        display: none; /* hide table headers */
+      }
+      tr {
+        margin-bottom: 20px;
+        background: #f7f9ea;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+      td {
+        padding: 8px 12px;
+        text-align: right;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 12px;
+        width: 50%;
+        font-weight: 600;
+        text-align: left;
+        color: #04bd9e;
+      }
+      .primary-btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .auth-card {
+        padding: 32px;
+      }
+      .title {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 20px;
+      }
+      .title {
+        font-size: 20px;
+      }
+      td {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>User Test Sessions</h2>
-  <table id="sessionsTable">
-    <thead>
-      <tr><th>Session ID</th><th>Date</th><th>Score</th><th>Total Time (sec)</th><th>Action</th><th>Emotion</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="auth-card">
+    <h2 class="title">User <span>Test Sessions</span></h2>
+    <table id="sessionsTable">
+      <thead>
+        <tr>
+          <th>Session ID</th>
+          <th>Date</th>
+          <th>Score</th>
+          <th>Total Time (sec)</th>
+          <th>Action</th>
+          <th>Emotion</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -30,12 +175,12 @@
         sessions.forEach(session => {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${session.session_id}</td>
-            <td>${new Date(session.started_at).toLocaleString()}</td>
-            <td>${session.total_score ?? 0}</td>
-            <td>${Math.round(session.total_time ?? 0)}</td>
-            <td><button onclick="viewSession(${session.session_id})">View Details</button></td>
-            <td><button onclick="viewEmotion(${session.session_id})">View Emotions </button></td>
+            <td data-label="Session ID">${session.session_id}</td>
+            <td data-label="Date">${new Date(session.started_at).toLocaleString()}</td>
+            <td data-label="Score">${session.total_score ?? 0}</td>
+            <td data-label="Total Time (sec)">${Math.round(session.total_time ?? 0)}</td>
+            <td data-label="Action"><button class="primary-btn" onclick="viewSession(${session.session_id})">View Details</button></td>
+            <td data-label="Emotion"><button class="primary-btn" onclick="viewEmotion(${session.session_id})">View Emotions</button></td>
           `;
           tbody.appendChild(row);
         });

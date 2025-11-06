@@ -3,78 +3,176 @@
 <head>
   <title>Test Details</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f0faff; }
-    h2 { color: #006699; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; }
-    tr:nth-child(even) { background-color: #e6f7ff; }
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #e9ffee, #00be95);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Card Wrapper */
+    .auth-card {
+      background: #fffef9;
+      padding: 40px;
+      border-radius: 28px;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* Title */
+    .title {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #212121;
+      text-align: center;
+    }
+    .title span {
+      color: #04bd9e;
+      font-weight: 700;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f7f9ea;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #9ce6cf;
+      text-align: left;
+      color: #212121;
+    }
+
+    th {
+      background: #21c4a1;
+      color: white;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    tr:nth-child(even) {
+      background: #f1ffe6;
+    }
+
+    tr:hover {
+      background: #f1ffe6;
+    }
+
+    /* Mobile Responsive: Convert rows into cards */
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+      thead tr {
+        display: none; /* hide table headers */
+      }
+      tr {
+        margin-bottom: 20px;
+        background: #f7f9ea;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      }
+      td {
+        padding: 8px 12px;
+        text-align: right;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 12px;
+        width: 50%;
+        font-weight: 600;
+        text-align: left;
+        color: #04bd9e;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .auth-card {
+        padding: 32px;
+      }
+      .title {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 20px;
+      }
+      .title {
+        font-size: 20px;
+      }
+      td {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>Test Details</h2>
-  <table id="detailsTable">
-    <thead>
-      <tr>
-        <th>Question</th>
-        <th>Answer</th>
-        <th>Time Taken (sec)</th>
-        <th>Score</th>
-        <th>Submitted At</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="auth-card">
+    <h2 class="title">Test <span>Details</span></h2>
+    <table id="detailsTable">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Answer</th>
+          <th>Time Taken (sec)</th>
+          <th>Score</th>
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
-    // const params = new URLSearchParams(window.location.search);
-    // const sessionId = params.get("session_id");
-
-    // fetch(`http://127.0.0.1:5000/admin/test_details/${sessionId}`)
-    //   .then(res => res.json())
-    //   .then(details => {
-    //     const tbody = document.querySelector("#detailsTable tbody");
-    //     details.forEach(entry => {
-    //       const row = document.createElement("tr");
-    //       row.innerHTML = `
-    //         <td>${entry.question_text}</td>
-    //         <td>${entry.answer}</td>
-    //         <td>${Math.round(entry.time_taken_seconds ?? 0)}</td>
-    //         <td>${entry.score_awarded}</td>
-    //         <td>${new Date(entry.submitted_at).toLocaleString()}</td>
-    //       `;
-    //       tbody.appendChild(row);
-    //     });
-    //   });
     const params = new URLSearchParams(window.location.search);
-const sessionId = params.get("session_id");
+    const sessionId = params.get("session_id");
 
-if (!sessionId) {
-  console.error("No session_id found in URL");
-} else {
-  fetch(`http://127.0.0.1:5000/admin/test_details/${sessionId}`)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(details => {
-      const tbody = document.querySelector("#detailsTable tbody");
-      details.forEach(entry => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${entry.question_text}</td>
-          <td>${entry.answer}</td>
-          <td>${Math.round(entry.time_taken_seconds ?? 0)}</td>
-          <td>${entry.score_awarded}</td>
-          <td>${new Date(entry.submitted_at).toLocaleString()}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    })
-    .catch(err => console.error("Error fetching details:", err));
-}
-
+    if (!sessionId) {
+      console.error("No session_id found in URL");
+    } else {
+      fetch(`http://127.0.0.1:5000/admin/test_details/${sessionId}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+          return res.json();
+        })
+        .then(details => {
+          const tbody = document.querySelector("#detailsTable tbody");
+          details.forEach(entry => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td data-label="Question">${entry.question_text}</td>
+              <td data-label="Answer">${entry.answer}</td>
+              <td data-label="Time Taken (sec)">${Math.round(entry.time_taken_seconds ?? 0)}</td>
+              <td data-label="Score">${entry.score_awarded}</td>
+              <td data-label="Submitted At">${new Date(entry.submitted_at).toLocaleString()}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(err => console.error("Error fetching details:", err));
+    }
   </script>
 </body>
 </html>

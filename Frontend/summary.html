@@ -3,42 +3,141 @@
 <head>
   <title>MMSE Score Summary</title>
   <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
     body {
-      font-family: Arial;
-      background-color: #f5faff;
+      background: linear-gradient(135deg, #e9ffee, #00be95);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Card Wrapper */
+    .summary-card {
+      background: #faf7e9;
+      padding: 30px 50px;
+      border-radius: 28px;
+      box-shadow: 0 18px 38px rgba(0, 0, 0, 0.14);
       text-align: center;
-      padding-top: 50px;
+      max-width: 450px;
+      width: 100%;
+      margin-bottom: 26vh;
     }
+
     h1 {
-      color: #0077cc;
-    }
-    #score-box {
-      font-size: 1.8rem;
+      font-size: 33px;
+      font-weight: 600;
+      font-family:  sans-serif;
       font-weight: bold;
-      margin-top: 20px;
+      color: #144c72;
+      margin-bottom: 25px;
     }
-    #home{
-      margin-top: 10vh;
-      height:4.5vh;
-      width:15vh;
-      background-color: #49a1df;
-      color:#f5faff;
-      border: 0cap;
-      box-shadow: #007;
-      border-radius: 1.4vh;
+
+   #score-box {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin: 20px 0;
+  background: linear-gradient(90deg, #23d1a3, #0592bc); /* two green shades */
+  
+  /* Standard & vendor-prefixed properties for compatibility */
+  background-clip: text;           /* Standard */
+  -webkit-background-clip: text;   /* WebKit browsers (Chrome, Safari) */
+  -moz-background-clip: text;      /* Firefox support */
+  
+  color: transparent;               /* Make text fill transparent so gradient shows */
+  -webkit-text-fill-color: transparent; /* WebKit browsers */
+  
+  display: inline-block;
+  animation: fadeInScore 1s ease-in-out;
+}
+
+/* Optional animation */
+@keyframes fadeInScore {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+    /* Button */
+    #home {
+      margin-top: 25px;
+      padding: 14px 25px;
+      background: #21c4a1;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #home:hover {
+      background: #1fb08e;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .summary-card {
+        padding: 32px 35px;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      #score-box {
+        font-size: 1.6rem;
+      }
+      #home {
+        font-size: 15px;
+        padding: 12px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .summary-card {
+        padding: 25px 20px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      #score-box {
+        font-size: 1.4rem;
+      }
+      #home {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>MMSE Test Result</h1>
-  <div id="score-box">Loading score...</div>
-  <button id="home">Go to Home </button>
+  <div class="summary-card">
+    <h1>MMSE Test <span>Result</span></h1>
+    <div id="score-box">Loading score...</div>
+    <button id="home">Go to Home</button>
+  </div>
 
   <script>
     const BASE_URL = 'http://127.0.0.1:5000';
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) window.location.href = "login.html";
-    
 
     fetch(`${BASE_URL}/total_score/${user.id}`)
       .then(res => res.json())
@@ -48,129 +147,22 @@
         document.getElementById("score-box").textContent =
           `You scored ${score} out of ${total}`;
       })
-      
-     
       .catch(err => {
         document.getElementById("score-box").textContent = "Unable to load score.";
         console.error(err);
       });
 
-      const btn = document.getElementById("home");
-      btn.addEventListener("click",()=>{
-        const user = JSON.parse(localStorage.getItem("user"));
-
-        if(!user){
-          window.location.href = "login.html";
-        }else if(user.role == "main_host"){
-          window.location.href = "admin_dashboard.html";
-        }else{
-          window.location.href = "profile.html";
-        }
-      })
+    const btn = document.getElementById("home");
+    btn.addEventListener("click", () => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        window.location.href = "login.html";
+      } else if (user.role === "main_host") {
+        window.location.href = "admin_dashboard.html";
+      } else {
+        window.location.href = "profile.html";
+      }
+    });
   </script>
 </body>
 </html>
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alzheimer Detection Summary</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #0f172a;
-      color: #e2e8f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      margin: 0;
-    }
-
-    .summary-card {
-      background: #1e293b;
-      padding: 40px 50px;
-      border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      animation: fadeIn 1s ease-in-out;
-      width: 400px;
-    }
-
-    h1 {
-      color: #38bdf8;
-      margin-bottom: 20px;
-      font-size: 1.8rem;
-    }
-
-    .score {
-      font-size: 1.2rem;
-      margin: 15px 0;
-    }
-
-    .risk-bar-container {
-      margin-top: 30px;
-      background-color: #334155;
-      border-radius: 10px;
-      height: 25px;
-      overflow: hidden;
-    }
-
-    .risk-bar {
-      height: 100%;
-      width: 0;
-      border-radius: 10px;
-      transition: width 1s ease-in-out;
-    }
-
-    .risk-label {
-      margin-top: 10px;
-      font-weight: 600;
-    }
-
-    button {
-      margin-top: 25px;
-      background-color: #2563eb;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease-in-out;
-    }
-
-    button:hover {
-      background-color: #1d4ed8;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
-</head>
-<body>
-  <div class="summary-card">
-    <h1>Alzheimer Detection Summary</h1>
-    <div class="score"><strong>MMSE Score:</strong> <span id="mmse"></span></div>
-    <div class="score"><strong>Facial Alzheimer’s Risk:</strong> <span id="facial"></span>%</div>
-    <div class="score"><strong>Combined Alzheimer’s Probability:</strong> <span id="final"></span>%</div>
-
-    <div class="risk-bar-container">
-      <div id="riskBar" class="risk-bar"></div>
-    </div>
-    <div class="risk-label" id="riskLabel"></div>
-
-    <button onclick="redirectHome()">Restart Test</button>
-  </div>
-
-  <script src="summary.js"></script>
-</body>
-</html>
- -->

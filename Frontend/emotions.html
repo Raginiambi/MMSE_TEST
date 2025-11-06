@@ -4,88 +4,141 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emotion Report</title>
-  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-  body {
-            background-color: #0e0e0e;
-            color: white;
-            font-family: sans-serif; /* Changed from "Poppins" if not imported */
-            text-align: center;
-            padding: 40px;
-        }
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
 
-        /* --- FLEXBOX LAYOUT --- */
-        #content-container {
-            display: flex; /* Activate Flexbox */
-            gap: 30px;     /* Space between the two columns */
-            padding: 20px;
-            width: 100%;
-            margin: 0 auto;
-            max-width: 1200px; /* Limit the max width for better readability */
-            text-align: left; /* Align content inside sections to the left */
-        }
-        
-        .side-panel {
-            flex: 1; /* Makes both panels take up equal space */
-            min-width: 0; /* Ensures content doesn't overflow */
-            padding: 20px;
-            border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.05); /* Light translucent background */
-        }
-        
-        #chart-section {
-            /* Ensures chart doesn't take up too much vertical space */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    body {
+      background: linear-gradient(135deg, #e9ffee, #00be95);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        /* Adjust the canvas size within its container */
-        #emotionChart {
-            max-height: 400px;
-            max-width: 100%;
-            margin-top: 10px; /* Reduce extra margin */
-        }
+    h1 {
+      color: #212121;
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      text-align: center;
+    }
 
-        /* --- BUTTON & MISC STYLES --- */
-        .back-btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            margin-top: 30px;
-            width: 25vh;
-        }
-        .back-btn:hover {
-            transform: scale(1.05);
-        }
+    h3 {
+      color: #156979;
+      font-size: 20px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
 
-        /* --- TABLE STYLES --- */
-        #session-data table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9em;
-        }
-        #session-data th, #session-data td {
-            padding: 8px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        #session-data th {
-            background-color: rgba(255, 255, 255, 0.1);
-            text-align: left;
-        }
+    /* Chart container */
+    #emotionChart {
+      max-width: 600px;
+      width: 100%;
+      background: #fffef9;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+      margin-bottom: 25px;
+    }
+
+    /* Back button */
+    .back-btn {
+      padding: 14px 25px;
+      background: #21c4a1;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #1fb08e;
+      transform: scale(1.05);
+    }
+
+    /* Table Styles */
+    #session-data table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.9em;
+      background: #faf7e9;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    #session-data th, #session-data td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #9ce6cf;
+      color: #212121;
+      text-align: left;
+    }
+
+    #session-data th {
+      background-color: #21c4a1;
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:hover {
+      background-color: #f1ffe6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 28px;
+      }
+      h3 {
+        font-size: 18px;
+      }
+      #emotionChart {
+        padding: 15px;
+      }
+      .back-btn {
+        font-size: 15px;
+        padding: 12px 22px;
+      }
+      #session-data th, #session-data td {
+        padding: 8px 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+      h3 {
+        font-size: 16px;
+      }
+      #emotionChart {
+        padding: 12px;
+      }
+      .back-btn {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px 0;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Emotion Analysis Report</h1>
-  <h3 id="sessionTitle"></h3>
+  <h3 id="sessionTitle">Session #1</h3>
   <canvas id="emotionChart"></canvas>
-  <button class="back-btn" onclick="history.back()">Back to the main page</button>
+  <button class="back-btn" onclick="history.back()">Back to Main Page</button>
 
   <script src="emotions.js"></script>
 </body>
